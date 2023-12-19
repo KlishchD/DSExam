@@ -26,15 +26,18 @@ public class Repository extends UnicastRemoteObject implements RepositoryInterfa
     public synchronized Email get(int id) throws RemoteException {
         Email result = null;
         for (Email email: list) {
-            result = email;
+            if (email.getId() == id) {
+                result = email;
+            }
         }
         return result;
     }
 
     @Override
     public synchronized void update(Email email) throws RemoteException {
-        list.removeIf(x -> x.getId() == email.getId());
-        list.add(email);
+        if (list.removeIf(x -> x.getId() == email.getId())) {
+            list.add(email);
+        }
     }
 
     @Override
@@ -49,6 +52,6 @@ public class Repository extends UnicastRemoteObject implements RepositoryInterfa
 
     @Override
     public List<Email> findAllByReceiver(String receiver) throws RemoteException {
-        return list.stream().filter(x -> x.getTitle().contains(receiver)).collect(Collectors.toList());
+        return list.stream().filter(x -> x.getReceiver().contains(receiver)).collect(Collectors.toList());
     }
 }

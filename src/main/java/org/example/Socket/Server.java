@@ -48,14 +48,14 @@ public class Server {
                 DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
 
                 boolean isAlive = true;
-                while (isAlive && clientSocket.isConnected()) {
-                    int operation = in.read();
+                while (isAlive && clientSocket.isBound()) {
+                    int operation = in.readInt();
                     switch (operation) {
                         case 0: isAlive = false; break;
                         case 1: {
                             int length = in.readInt();
                             byte[] bytes = new byte[length];
-                            in.read(bytes);
+                            in.readFully(bytes);
 
                             Email email = (Email) Serialization.fromBytes(bytes);
                             repository.create(email);
@@ -76,7 +76,7 @@ public class Server {
                         case 3: {
                             int length = in.readInt();
                             byte[] bytes = new byte[length];
-                            in.read(bytes);
+                            in.readFully(bytes);
 
                             Email email = (Email) Serialization.fromBytes(bytes);
                             repository.update(email);
@@ -92,6 +92,7 @@ public class Server {
                         case 5: {
                             int length = in.readInt();
                             byte[] inBytes = new byte[length];
+                            in.readFully(inBytes);
                             String title = (String) Serialization.fromBytes(inBytes);
 
                             List<Email> emails = repository.findAllByTitle(title);
@@ -102,10 +103,13 @@ public class Server {
                                 out.writeInt(bytes.length());
                                 out.writeBytes(bytes);
                             }
+
+                            break;
                         }
                         case 6: {
                             int length = in.readInt();
                             byte[] inBytes = new byte[length];
+                            in.readFully(inBytes);
                             String receiver = (String) Serialization.fromBytes(inBytes);
 
                             List<Email> emails = repository.findAllByReceiver(receiver);
@@ -116,6 +120,8 @@ public class Server {
                                 out.writeInt(bytes.length());
                                 out.writeBytes(bytes);
                             }
+
+                            break;
                         }
                     }
                 }
